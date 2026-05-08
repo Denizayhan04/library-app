@@ -1,0 +1,15 @@
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/service/BorrowService.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/model/Book.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/model/BorrowLog.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/repository/BookRepository.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/service/CustomUserDetailsService.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/service/BookService.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/config/DataInitializer.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/model/User.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/repository/BorrowLogRepository.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/controller/AuthController.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/repository/UserRepository.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/config/SecurityConfig.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/controller/AdminController.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/controller/BookController.java
+/Users/denizayhan04/Desktop/library-app/src/main/java/com/library/LibraryApplication.java

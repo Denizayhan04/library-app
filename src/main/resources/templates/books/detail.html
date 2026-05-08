@@ -12,6 +12,10 @@
         <a href="/books">← Kitap Listesine Dön</a>
     </div>
 
+    <!-- Başarı/Hata Mesajları -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
     <div class="detail-card">
         <div class="detail-header">
             <div class="book-category" th:text="${book.category}">Kategori</div>
@@ -19,8 +23,14 @@
             <p class="book-author-lg">✍ <span th:text="${book.author}">Yazar</span></p>
         </div>
 
-        <div class="detail-body">
-            <table class="detail-table">
+        <div class="detail-body" style="display: flex; gap: 2rem; align-items: flex-start;">
+            
+            <div th:if="${book.image != null}" class="book-image-container" style="flex-shrink: 0;">
+                <img th:src="@{/books/{id}/image(id=${book.id})}" alt="Kitap Kapağı" style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+            </div>
+
+            <div style="flex-grow: 1;">
+                <table class="detail-table">
                 <tr>
                     <th>ISBN</th>
                     <td th:text="${book.isbn}">-</td>
@@ -37,16 +47,32 @@
                     <th>Durum</th>
                     <td>
                         <span class="badge"
-                              th:classappend="${book.available} ? 'badge-success' : 'badge-danger'"
-                              th:text="${book.available} ? 'Mevcut' : 'Ödünç Verildi'">
+                              th:classappend="${book.stock > 0} ? 'badge-success' : 'badge-danger'"
+                              th:text="${book.stock > 0} ? 'Mevcut' : 'Stokta Yok'">
                         </span>
                     </td>
+                </tr>
+                <tr>
+                    <th>Stok</th>
+                    <td th:text="${book.stock}">0</td>
                 </tr>
             </table>
 
             <div th:if="${book.description}" class="description-box">
                 <h4>Açıklama</h4>
                 <p th:text="${book.description}">Açıklama yok.</p>
+            </div>
+            </div> <!-- Close flex-grow div -->
+        </div>
+
+        <!-- Kullanıcı İşlemleri -->
+        <div class="detail-footer" sec:authorize="isAuthenticated()">
+            <form th:if="${book.stock > 0}" th:action="@{/books/{id}/borrow(id=${book.id})}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-primary">📚 Ödünç Al</button>
+            </form>
+            <div th:unless="${book.stock > 0}">
+                <button class="btn btn-secondary" disabled>Stokta Yok</button>
             </div>
         </div>
 

@@ -43,14 +43,20 @@
     <div class="book-grid" th:unless="${books.empty}">
         <div class="book-card" th:each="book : ${books}">
             <div class="book-card-body">
+                <div th:if="${book.image != null}" style="text-align: center; margin-bottom: 1rem;">
+                    <img th:src="@{/books/{id}/image(id=${book.id})}" alt="Kapak" style="max-height: 150px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>
+                </div>
+                <div th:unless="${book.image != null}" style="text-align: center; margin-bottom: 1rem; height: 150px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #adb5bd;">
+                    <span>Resim Yok</span>
+                </div>
                 <div class="book-category" th:text="${book.category}">Kategori</div>
                 <h3 class="book-title">
                     <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">Kitap Adı</a>
                 </h3>
                 <p class="book-author">✍ <span th:text="${book.author}">Yazar</span></p>
                 <p class="book-year">📅 <span th:text="${book.publishYear}">Yıl</span></p>
-                <span class="badge" th:classappend="${book.available} ? 'badge-success' : 'badge-danger'"
-                      th:text="${book.available} ? 'Mevcut' : 'Ödünç Verildi'">Durum</span>
+                <span class="badge" th:classappend="${book.stock > 0} ? 'badge-success' : 'badge-danger'"
+                      th:text="${book.stock > 0} ? 'Mevcut' : 'Stokta Yok'">Durum</span>
             </div>
             <div class="book-card-footer">
                 <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-sm btn-outline">Detay</a>

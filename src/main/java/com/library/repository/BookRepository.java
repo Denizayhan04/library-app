@@ -23,4 +23,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     // Yazara göre listeleme
     List<Book> findByAuthorContainingIgnoreCase(String author);
+
+    @Query("SELECT SUM(b.stock) FROM Book b")
+    Integer sumStock();
 }

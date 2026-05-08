@@ -12,9 +12,11 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final com.library.service.BorrowService borrowService;
 
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService, com.library.service.BorrowService borrowService) {
         this.bookService = bookService;
+        this.borrowService = borrowService;
     }
 
     // Ana sayfa -> kitap listesine yönlendir
@@ -53,5 +55,58 @@ public class BookController {
     public String bookDetail(@PathVariable Long id, Model model) {
         model.addAttribute("book", bookService.getBookById(id));
         return "books/detail";
+    }
+
+    @PostMapping("/books/{id}/borrow")
+    public String borrowBook(@PathVariable Long id, org.springframework.security.core.Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        
+        try {
+            borrowService.borrowBook(id, authentication.getName());
+            redirectAttributes.addFlashAttribute("successMessage", "Kitap başarıyla ödünç alındı.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/books/" + id;
+    }
+
+    @GetMapping("/books/{id}/image")
+    public org.springframework.http.ResponseEntity<byte[]> getBookImage(@PathVariable Long id) {
+        Book book = bookService.getBookById(id);
+        if (book != null && book.getImage() != null) {
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.IMAGE_JPEG);
+            return new org.springframework.http.ResponseEntity<>(book.getImage(), headers, org.springframework.http.HttpStatus.OK);
+        }
+        return new org.springframework.http.ResponseEntity<>(org.springframework.http.HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/my-books")
+    public String myBooks(Model model, org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        
+        List<com.library.model.BorrowLog> logs = borrowService.getUserBorrowLogs(authentication.getName());
+        model.addAttribute("borrowLogs", logs);
+        return "books/my-books";
+    }
+
+    @PostMapping("/my-books/return/{id}")
+    public String returnBook(@PathVariable Long id, org.springframework.security.core.Authentication authentication, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        try {
+            borrowService.returnBook(id, authentication.getName());
+            redirectAttributes.addFlashAttribute("successMessage", "Kitap başarıyla iade edildi.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        
+        return "redirect:/my-books";
     }
 }

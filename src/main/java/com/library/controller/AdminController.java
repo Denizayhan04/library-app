@@ -14,15 +14,37 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     private final BookService bookService;
+    private final com.library.repository.UserRepository userRepository;
+    private final com.library.repository.BorrowLogRepository borrowLogRepository;
+    private final com.library.repository.BookRepository bookRepository;
 
-    public AdminController(BookService bookService) {
+    public AdminController(BookService bookService, 
+                           com.library.repository.UserRepository userRepository,
+                           com.library.repository.BorrowLogRepository borrowLogRepository,
+                           com.library.repository.BookRepository bookRepository) {
         this.bookService = bookService;
+        this.userRepository = userRepository;
+        this.borrowLogRepository = borrowLogRepository;
+        this.bookRepository = bookRepository;
     }
 
     // Admin ana sayfa - kitap listesi
     @GetMapping
     public String adminPanel(Model model) {
         model.addAttribute("books", bookService.getAllBooks());
+        
+        long totalUsers = userRepository.count();
+        long borrowedBooks = borrowLogRepository.countByStatus("BORROWED");
+        long totalBooks = bookRepository.count();
+        Integer totalStock = bookRepository.sumStock();
+        if (totalStock == null) totalStock = 0;
+        
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("borrowedBooks", borrowedBooks);
+        model.addAttribute("totalBooks", totalBooks);
+        model.addAttribute("totalStock", totalStock);
+        model.addAttribute("borrowLogs", borrowLogRepository.findAllByOrderByBorrowDateDesc());
+        
         return "admin/panel";
     }
 
@@ -38,12 +60,29 @@ public class AdminController {
     @PostMapping("/books/save")
     public String saveBook(@Valid @ModelAttribute Book book,
                            BindingResult result,
+                           @RequestParam(value = "imageFile", required = false) org.springframework.web.multipart.MultipartFile imageFile,
                            Model model,
                            RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             model.addAttribute("pageTitle", book.getId() == null ? "Yeni Kitap Ekle" : "Kitabı Düzenle");
             return "admin/book-form";
         }
+        
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                book.setImage(imageFile.getBytes());
+            } else if (book.getId() != null) {
+                // Mevcut kitabı güncellerken yeni resim yüklenmemişse eski resmi koru
+                Book existingBook = bookService.getBookById(book.getId());
+                if (existingBook != null) {
+                    book.setImage(existingBook.getImage());
+                }
+            }
+        } catch (java.io.IOException e) {
+            result.rejectValue("image", "error.book", "Resim yüklenirken bir hata oluştu");
+            return "admin/book-form";
+        }
+
         bookService.saveBook(book);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Kitap başarıyla " + (book.getId() == null ? "eklendi" : "güncellendi") + "!");

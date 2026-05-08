@@ -15,6 +15,26 @@
     <!-- Başarı mesajı -->
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
+    <!-- İstatistik Kartları -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+        <div style="flex: 1; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+            <h3 style="margin: 0; color: #555;">Kullanıcılar</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 10px 0; color: #007bff;" th:text="${totalUsers}">0</p>
+        </div>
+        <div style="flex: 1; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+            <h3 style="margin: 0; color: #555;">Ödünç Alınan</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 10px 0; color: #ffc107;" th:text="${borrowedBooks}">0</p>
+        </div>
+        <div style="flex: 1; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+            <h3 style="margin: 0; color: #555;">Stok Toplamı</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 10px 0; color: #28a745;" th:text="${totalStock}">0</p>
+        </div>
+        <div style="flex: 1; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+            <h3 style="margin: 0; color: #555;">Kitap Çeşit</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 10px 0; color: #6f42c1;" th:text="${totalBooks}">0</p>
+        </div>
+    </div>
+
     <!-- Kitap tablosu -->
     <div class="table-card">
         <table class="data-table">
@@ -25,6 +45,7 @@
                     <th>Yazar</th>
                     <th>Kategori</th>
                     <th>Yıl</th>
+                    <th>Stok</th>
                     <th>Durum</th>
                     <th>İşlemler</th>
                 </tr>
@@ -38,10 +59,11 @@
                     <td th:text="${book.author}">Yazar</td>
                     <td th:text="${book.category}">Kategori</td>
                     <td th:text="${book.publishYear}">2024</td>
+                    <td th:text="${book.stock}">0</td>
                     <td>
                         <span class="badge"
-                              th:classappend="${book.available} ? 'badge-success' : 'badge-danger'"
-                              th:text="${book.available} ? 'Mevcut' : 'Ödünç'">
+                              th:classappend="${book.stock > 0} ? 'badge-success' : 'badge-danger'"
+                              th:text="${book.stock > 0} ? 'Mevcut' : 'Stok Yok'">
                         </span>
                     </td>
                     <td class="action-cell">
@@ -67,7 +89,39 @@
     </div>
 
     <div class="stats-bar">
-        <span>Toplam: <strong th:text="${books.size()}">0</strong> kitap</span>
+        <span>Toplam: <strong th:text="${books.size()}">0</strong> kitap listelendi</span>
+    </div>
+
+    <!-- Ödünç Alma Geçmişi -->
+    <h2 style="margin-top: 3rem;">Ödünç Alma Geçmişi</h2>
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>Kullanıcı</th>
+                    <th>Kitap</th>
+                    <th>Ödünç Tarihi</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="log : ${borrowLogs}">
+                    <td th:text="${log.id}">1</td>
+                    <td th:text="${log.user.username}">user</td>
+                    <td th:text="${log.book.title}">Kitap</td>
+                    <td th:text="${#temporals.format(log.borrowDate, 'dd-MM-yyyy HH:mm')}">Tarih</td>
+                    <td>
+                        <span class="badge badge-warning" th:text="${log.status}">BORROWED</span>
+                    </td>
+                </tr>
+                <tr th:if="${borrowLogs.empty}">
+                    <td colspan="5" style="text-align:center; padding: 2rem;">
+                        Henüz ödünç alma işlemi bulunmuyor.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
 </main>
