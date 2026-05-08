@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <div class="back-link">
+        <a href="/admin">← Yönetim Paneline Dön</a>
+    </div>
+
+    <div class="form-card">
+        <h2 th:text="${pageTitle}">Kitap Formu</h2>
+
+        <form th:action="@{/admin/books/save}" th:object="${book}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title">Kitap Adı *</label>
+                    <input type="text" id="title" th:field="*{title}"
+                           class="form-control" th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                           placeholder="Kitap adını girin"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="author">Yazar *</label>
+                    <input type="text" id="author" th:field="*{author}"
+                           class="form-control" th:classappend="${#fields.hasErrors('author')} ? 'is-invalid'"
+                           placeholder="Yazar adını girin"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="isbn">ISBN *</label>
+                    <input type="text" id="isbn" th:field="*{isbn}"
+                           class="form-control" th:classappend="${#fields.hasErrors('isbn')} ? 'is-invalid'"
+                           placeholder="978-xxx-xx-xxxx-x"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('isbn')}" th:errors="*{isbn}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Kategori *</label>
+                    <select id="category" th:field="*{category}"
+                            class="form-control" th:classappend="${#fields.hasErrors('category')} ? 'is-invalid'">
+                        <option value="">-- Seçiniz --</option>
+                        <option value="Roman">Roman</option>
+                        <option value="Bilim Kurgu">Bilim Kurgu</option>
+                        <option value="Distopya">Distopya</option>
+                        <option value="Polisiye">Polisiye</option>
+                        <option value="Tarih">Tarih</option>
+                        <option value="Biyografi">Biyografi</option>
+                        <option value="Çocuk">Çocuk</option>
+                        <option value="Felsefe">Felsefe</option>
+                        <option value="Bilim">Bilim</option>
+                        <option value="Diğer">Diğer</option>
+                    </select>
+                    <span class="error-msg" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="publishYear">Yayın Yılı *</label>
+                    <input type="number" id="publishYear" th:field="*{publishYear}"
+                           class="form-control" th:classappend="${#fields.hasErrors('publishYear')} ? 'is-invalid'"
+                           placeholder="2024" min="1000" max="2099"/>
+                    <span class="error-msg" th:if="${#fields.hasErrors('publishYear')}" th:errors="*{publishYear}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="available">Durum</label>
+                    <select id="available" th:field="*{available}" class="form-control">
+                        <option value="true">Mevcut</option>
+                        <option value="false">Ödünç Verildi</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Açıklama</label>
+                <textarea id="description" th:field="*{description}"
+                          class="form-control" rows="4"
+                          placeholder="Kitap hakkında kısa bir açıklama..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Kaydet</button>
+                <a href="/admin" class="btn btn-outline">İptal</a>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+</body>
+</html>

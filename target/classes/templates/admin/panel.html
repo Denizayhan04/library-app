@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Yönetim Paneli')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <div class="page-header">
+        <h1>⚙ Yönetim Paneli</h1>
+        <a href="/admin/books/new" class="btn btn-primary">+ Yeni Kitap Ekle</a>
+    </div>
+
+    <!-- Başarı mesajı -->
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <!-- Kitap tablosu -->
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Kitap Adı</th>
+                    <th>Yazar</th>
+                    <th>Kategori</th>
+                    <th>Yıl</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="book : ${books}">
+                    <td th:text="${book.id}">1</td>
+                    <td>
+                        <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">Kitap</a>
+                    </td>
+                    <td th:text="${book.author}">Yazar</td>
+                    <td th:text="${book.category}">Kategori</td>
+                    <td th:text="${book.publishYear}">2024</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${book.available} ? 'badge-success' : 'badge-danger'"
+                              th:text="${book.available} ? 'Mevcut' : 'Ödünç'">
+                        </span>
+                    </td>
+                    <td class="action-cell">
+                        <a th:href="@{/admin/books/edit/{id}(id=${book.id})}"
+                           class="btn btn-sm btn-warning">Düzenle</a>
+                        <form th:action="@{/admin/books/delete/{id}(id=${book.id})}" method="post"
+                              style="display:inline"
+                              onsubmit="return confirm('Bu kitabı silmek istiyor musunuz?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <!-- Boş tablo -->
+                <tr th:if="${books.empty}">
+                    <td colspan="7" style="text-align:center; padding: 2rem;">
+                        Henüz kitap eklenmemiş. <a href="/admin/books/new">İlk kitabı ekleyin!</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="stats-bar">
+        <span>Toplam: <strong th:text="${books.size()}">0</strong> kitap</span>
+    </div>
+
+</main>
+
+</body>
+</html>

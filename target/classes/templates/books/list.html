@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Kitaplar')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <!-- Başlık -->
+    <div class="page-header">
+        <h1>Kitap Kataloğu</h1>
+        <p class="text-muted">Toplam <strong th:text="${totalBooks}">0</strong> kitap mevcut</p>
+    </div>
+
+    <!-- Arama Formu -->
+    <div class="search-bar">
+        <form action="/books" method="get" class="search-form">
+            <input type="text"
+                   name="keyword"
+                   th:value="${keyword}"
+                   placeholder="Kitap adı, yazar veya kategori ara..."
+                   class="search-input"/>
+            <button type="submit" class="btn btn-primary">🔍 Ara</button>
+            <a th:if="${searchActive}" href="/books" class="btn btn-outline">Temizle</a>
+        </form>
+    </div>
+
+    <!-- Arama sonucu bildirimi -->
+    <div th:if="${searchActive}" class="alert alert-info">
+        "<strong th:text="${keyword}"></strong>" için
+        <strong th:text="${books.size()}">0</strong> sonuç bulundu.
+    </div>
+
+    <!-- Kitap listesi yok -->
+    <div th:if="${books.empty}" class="empty-state">
+        <p>📭 Arama kriterlerinize uygun kitap bulunamadı.</p>
+        <a href="/books" class="btn btn-outline">Tüm kitapları gör</a>
+    </div>
+
+    <!-- Kitap kartları -->
+    <div class="book-grid" th:unless="${books.empty}">
+        <div class="book-card" th:each="book : ${books}">
+            <div class="book-card-body">
+                <div class="book-category" th:text="${book.category}">Kategori</div>
+                <h3 class="book-title">
+                    <a th:href="@{/books/{id}(id=${book.id})}" th:text="${book.title}">Kitap Adı</a>
+                </h3>
+                <p class="book-author">✍ <span th:text="${book.author}">Yazar</span></p>
+                <p class="book-year">📅 <span th:text="${book.publishYear}">Yıl</span></p>
+                <span class="badge" th:classappend="${book.available} ? 'badge-success' : 'badge-danger'"
+                      th:text="${book.available} ? 'Mevcut' : 'Ödünç Verildi'">Durum</span>
+            </div>
+            <div class="book-card-footer">
+                <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-sm btn-outline">Detay</a>
+                <!-- Sadece admin düzenleyebilir -->
+                <span sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/books/edit/{id}(id=${book.id})}" class="btn btn-sm btn-warning">Düzenle</a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>

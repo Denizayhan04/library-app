@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- NAVBAR FRAGMENT -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="nav-container">
+        <a href="/books" class="nav-brand">📚 KütüphaneApp</a>
+        <div class="nav-links">
+            <a href="/books" class="nav-link">Kitaplar</a>
+            <span sec:authorize="hasRole('ADMIN')">
+                <a href="/admin" class="nav-link admin-link">⚙ Yönetim</a>
+            </span>
+            <span sec:authorize="isAuthenticated()">
+                <span class="nav-user" sec:authentication="name"></span>
+                <form action="/logout" method="post" style="display:inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-sm btn-outline">Çıkış</button>
+                </form>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a href="/login" class="btn btn-sm btn-primary">Giriş</a>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<!-- HEAD FRAGMENT -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title} + ' - KütüphaneApp'">KütüphaneApp</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+
+</html>

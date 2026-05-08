@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${book.title})}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+
+    <div class="back-link">
+        <a href="/books">← Kitap Listesine Dön</a>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-header">
+            <div class="book-category" th:text="${book.category}">Kategori</div>
+            <h1 th:text="${book.title}">Kitap Adı</h1>
+            <p class="book-author-lg">✍ <span th:text="${book.author}">Yazar</span></p>
+        </div>
+
+        <div class="detail-body">
+            <table class="detail-table">
+                <tr>
+                    <th>ISBN</th>
+                    <td th:text="${book.isbn}">-</td>
+                </tr>
+                <tr>
+                    <th>Kategori</th>
+                    <td th:text="${book.category}">-</td>
+                </tr>
+                <tr>
+                    <th>Yayın Yılı</th>
+                    <td th:text="${book.publishYear}">-</td>
+                </tr>
+                <tr>
+                    <th>Durum</th>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${book.available} ? 'badge-success' : 'badge-danger'"
+                              th:text="${book.available} ? 'Mevcut' : 'Ödünç Verildi'">
+                        </span>
+                    </td>
+                </tr>
+            </table>
+
+            <div th:if="${book.description}" class="description-box">
+                <h4>Açıklama</h4>
+                <p th:text="${book.description}">Açıklama yok.</p>
+            </div>
+        </div>
+
+        <!-- Admin işlemleri -->
+        <div class="detail-footer" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/books/edit/{id}(id=${book.id})}" class="btn btn-warning">✏ Düzenle</a>
+            <form th:action="@{/admin/books/delete/{id}(id=${book.id})}" method="post"
+                  onsubmit="return confirm('Bu kitabı silmek istediğinizden emin misiniz?')">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-danger">🗑 Sil</button>
+            </form>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>
