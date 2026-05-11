@@ -42,8 +42,7 @@ public class Book {
     @Column(nullable = false)
     private Integer stock = 0;
 
-    @Lob
-    @Column(columnDefinition = "BLOB")
+    @Column(columnDefinition = "bytea")
     private byte[] image;
 
     // Constructors
