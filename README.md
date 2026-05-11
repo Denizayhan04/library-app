@@ -31,11 +31,21 @@ Sistem temel olarak `users`, `books` ve `borrow_logs` tablolarından oluşmaktad
 ### 1. Kimlik Doğrulama ve Erişim Kontrolü
 Sistemde yetkisiz erişimleri önlemek adına Spring Security filtresi uygulanmıştır. Ziyaretçiler yalnızca kitap listesini ve arama formunu görebilirken, işlem yapmak için giriş yapmaları gerekmektedir.
 
+> **Teknik Detaylar:**
+> * Güvenlik katmanı `SecurityConfig.java` sınıfında yapılandırılmış olup; `/admin/**` uç noktaları `ROLE_ADMIN` rolüne kısıtlanırken, ödünç alma gibi kritik işlemler için `isAuthenticated()` filtresi kullanılmıştır.
+> * Kullanıcı parolaları veritabanına açık metin yerine `BCryptPasswordEncoder` ile hash'lenerek kaydedilir.
+> * Kimlik doğrulama süreci, `CustomUserDetailsService` sınıfındaki `loadUserByUsername()` fonksiyonu ile `UserRepository.findByUsername()` sorgusunu kullanarak Spring Security'nin `UserDetails` objesini besler.
+
 ![Giriş Yapılmamış Durum](images/unauth-homepage.png)
 ![Kullanıcı Giriş/Kayıt Sayfası](images/auth-page.png)
 
 ### 2. Kitap Kataloğu ve Detay Görünümü
 Tüm kitaplar, kullanıcı dostu bir arayüz ile listelenmektedir. Her kitap kartı, dinamik stok durumunu (Mevcut / Stokta Yok) yansıtır.
+
+> **Teknik Detaylar:**
+> * Verilerin sunumu `BookController.java` içerisindeki `listBooks()` ve `bookDetail()` metotları ile koordine edilir.
+> * Kitap arama işlemi, `BookRepository` arayüzüne yazılan özel bir `@Query` anotasyonlu JPQL fonksiyonu (`search`) ile başlık, yazar ve kategori sütunları üzerinde esnek biçimde çalışır.
+> * Veritabanında byte formatında saklanan kitap görsellerini render etmek için `@GetMapping("/books/{id}/image")` uç noktası yazılmış ve veriler `ResponseEntity<byte[]>` (IMAGE_JPEG header'ı ile) olarak sayfadaki `<img>` etiketlerine aktarılmıştır.
 
 ![Ana Sayfa (Kitap Listesi)](images/homepage.png)
 ![Kitap Kartı](images/book-card.png)
@@ -47,6 +57,11 @@ Detaylı inceleme ekranında kitabın yayın yılı, kategorisi, ISBN numarası 
 ### 3. Ödünç Alma ve İade Süreçleri
 Oturum açmış kullanıcılar, stokta bulunan kitapları "Ödünç Al" işlemi ile üzerlerine kaydedebilirler. Ödünç alma işlemi başarılı olduğunda stok sayısı atomik olarak düşürülür.
 
+> **Teknik Detaylar:**
+> * Ödünç alma ve iade etme akışları `BorrowService.java` üzerindeki `borrowBook()` ve `returnBook()` fonksiyonları ile işletilir.
+> * Stok düşürme, log atma ve veritabanı senkronizasyonunda çıkabilecek olası hatalara (örn. işlemin yarıda kesilmesi) karşın veri tutarlılığını sağlamak için bu metotlar `@Transactional` anotasyonu ile sarmalanmıştır.
+> * Kullanıcının "Kitaplarım" sayfasındaki özel geçmiş listesi, `BorrowLogRepository` içindeki `findByUserUsernameOrderByBorrowDateDesc()` metodu üzerinden sadece o an oturum açmış kullanıcı adına çekilerek `myBooks()` controller'ına iletilir.
+
 ![Ödünç Alma İşlemi](images/borrow-alert.png)
 
 Kullanıcılar "Kitaplarım" sayfası üzerinden daha önce ödünç aldıkları kitapların listesini ve durumlarını görebilir, diledikleri zaman "İade Et" butonu ile kitapları sisteme geri kazandırabilirler.
@@ -56,6 +71,11 @@ Kullanıcılar "Kitaplarım" sayfası üzerinden daha önce ödünç aldıkları
 
 ### 4. Yönetim Paneli (Admin Dashboard)
 Yönetici yetkisine (`ROLE_ADMIN`) sahip kullanıcılar için özel bir gösterge paneli geliştirilmiştir. Bu panelde sistemin genel istatistikleri (toplam kitap, stok durumu, kullanıcı sayısı, aktif ödünç listesi) izlenebilmektedir.
+
+> **Teknik Detaylar:**
+> * Bu paneli yöneten tüm uç noktalar `AdminController.java` üzerinde toplanmış ve kök düzeyinde `@RequestMapping("/admin")` tanımlaması yapılmıştır.
+> * Sistemdeki toplam kitap stoku gibi veriler for döngüleri yerine `BookRepository.sumStock()` JPQL komutuyla doğrudan veritabanı seviyesinde toplanarak performans kazanılmıştır.
+> * Kitap eklendiğinde `saveBook()` metoduna bir `MultipartFile imageFile` objesi alınır. Dosyanın binary karşılığı `.getBytes()` fonksiyonu ile okunup doğrudan `Book` modelinin `image` propertysine atanır ve Spring Data JPA tarafından kaydedilir.
 
 ![Yönetim Paneli](images/admin-panel.png)
 
@@ -80,5 +100,5 @@ Projenin yerel ortamda çalıştırılabilmesi için bilgisayarınızda Java 17,
    ```bash
    mvn clean spring-boot:run
    ```
-3. Tarayıcınız üzerinden `http://localhost:8081` adresine giderek uygulamayı görüntüleyebilirsiniz. Sistem boş başlatıldığında, test verileri otomatik olarak eklenecektir.
+3. Tarayıcınız üzerinden `http://localhost:8081` adresine giderek uygulamayı görüntüleyebilirsiniz. 
 
