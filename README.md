@@ -82,5 +82,3 @@ Projenin yerel ortamda çalıştırılabilmesi için bilgisayarınızda Java 17,
    ```
 3. Tarayıcınız üzerinden `http://localhost:8081` adresine giderek uygulamayı görüntüleyebilirsiniz. Sistem boş başlatıldığında, test verileri otomatik olarak eklenecektir.
 
----
-*Geliştirici: Deniz Ayhan*
