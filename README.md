@@ -1,30 +1,19 @@
 # Kütüphane Yönetim Sistemi (Library Management System)
 
-Bu proje, modern yazılım mimarisi prensipleri gözetilerek geliştirilmiş, tam yığın (full-stack) bir Kütüphane Yönetim Sistemi uygulamasıdır. Kullanıcıların kitapları inceleyip ödünç alabildiği, yöneticilerin ise envanteri ve kullanıcı işlemlerini takip edebildiği güvenli, ölçeklenebilir ve sağlam bir altyapıya sahiptir.
-
-## Teknik Mimari ve Teknolojiler
-
-Proje, Katmanlı Mimari (Layered Architecture) desenine uygun olarak, kodun tekrar edilebilirliğini ve sürdürülebilirliğini artırmak amacıyla tasarlanmıştır.
-
-* **Programlama Dili:** Java 17
-* **Çatı (Framework):** Spring Boot 3.2.0
-* **Kimlik Doğrulama ve Yetkilendirme:** Spring Security 6 (BCrypt şifreleme ve Role-Based Access Control)
-* **Veritabanı ve ORM:** PostgreSQL (Docker ortamında), Spring Data JPA (Hibernate)
-* **Önyüz (Frontend):** Thymeleaf Şablon Motoru, HTML5, Vanilla CSS
-* **Bağımlılık Yönetimi:** Maven
+Bu proje kullanıcıların kitapları inceleyip ödünç alabildiği, yöneticilerin ise envanteri ve kullanıcı işlemlerini takip edebildiği bir Kütüphane Yönetim Sistemi uygulamasıdır.
 
 ## Veritabanı Altyapısı
 
-Projenin veri kalıcılığı, izolasyon ve performans gereksinimlerini karşılamak üzere Docker konteyneri üzerinde çalışan bir PostgreSQL sunucusu ile sağlanmaktadır.
+Proje veritabanı olarak Docker üzerinde çalışan bir PostgreSQL sunucusu kullanır
 
 ![Docker PostgreSQL Sunucusu](images/docker-postgresql-server.png)
 
 ### Veritabanı Şeması (ERD)
-Sistem temel olarak `users`, `books` ve `borrow_logs` tablolarından oluşmaktadır. Veriler arasındaki ilişkiler ve kısıtlamalar (constraints) Hibernate tarafından dinamik olarak yönetilmektedir.
+Sistem temel olarak `users`, `books` ve `borrow_logs` tablolarından oluşmaktadır.
 
 ![Veritabanı Şeması](images/database-schema.png)
 
-*Not: Uygulamaya yüklenen kitap görselleri, dosya dizini yerine doğrudan PostgreSQL veritabanında `BYTEA` veri tipi ile ikili nesne (BLOB) olarak saklanmaktadır.*
+*Not: Uygulamaya yüklenen kitap görselleri `BYTEA` veri tipi ile BLOB olarak saklanmaktadır.*
 
 ## Sistem Özellikleri ve Kullanıcı Arayüzü
 
@@ -50,7 +39,7 @@ Tüm kitaplar, kullanıcı dostu bir arayüz ile listelenmektedir. Her kitap kar
 ![Ana Sayfa (Kitap Listesi)](images/homepage.png)
 ![Kitap Kartı](images/book-card.png)
 
-Detaylı inceleme ekranında kitabın yayın yılı, kategorisi, ISBN numarası ve açıklaması yer almaktadır. Resimler veritabanından doğrudan render edilerek arayüze basılır.
+Detaylı inceleme ekranında kitabın yayın yılı, kategorisi, ISBN numarası ve açıklaması yer almaktadır.
 
 ![Kitap Detay Sayfası](images/book-page.png)
 
