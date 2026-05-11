@@ -1,0 +1,77 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.library:library-app >-----------------------
+[INFO] Building library-app 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.0:run (default-cli) > test-compile @ library-app >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ library-app ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 8 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ library-app ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ library-app ---
+[INFO] skip non existing resourceDirectory /Users/denizayhan04/Desktop/library-app/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ library-app ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.2.0:run (default-cli) < test-compile @ library-app <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.0:run (default-cli) @ library-app ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2026-05-11T10:39:04.712+03:00  INFO 18718 --- [library-app] [           main] com.library.LibraryApplication           : Starting LibraryApplication using Java 17.0.18 with PID 18718 (/Users/denizayhan04/Desktop/library-app/target/classes started by denizayhan04 in /Users/denizayhan04/Desktop/library-app)
+2026-05-11T10:39:04.713+03:00  INFO 18718 --- [library-app] [           main] com.library.LibraryApplication           : No active profile set, falling back to 1 default profile: "default"
+2026-05-11T10:39:05.029+03:00  INFO 18718 --- [library-app] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-11T10:39:05.055+03:00  INFO 18718 --- [library-app] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 22 ms. Found 3 JPA repository interfaces.
+2026-05-11T10:39:05.303+03:00  INFO 18718 --- [library-app] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-05-11T10:39:05.308+03:00  INFO 18718 --- [library-app] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-05-11T10:39:05.308+03:00  INFO 18718 --- [library-app] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-05-11T10:39:05.335+03:00  INFO 18718 --- [library-app] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-05-11T10:39:05.336+03:00  INFO 18718 --- [library-app] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 606 ms
+2026-05-11T10:39:05.428+03:00  INFO 18718 --- [library-app] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-11T10:39:05.463+03:00  INFO 18718 --- [library-app] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
+2026-05-11T10:39:05.480+03:00  INFO 18718 --- [library-app] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-05-11T10:39:05.601+03:00  INFO 18718 --- [library-app] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-11T10:39:05.617+03:00  INFO 18718 --- [library-app] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-05-11T10:39:05.708+03:00  INFO 18718 --- [library-app] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@59b492ec
+2026-05-11T10:39:05.709+03:00  INFO 18718 --- [library-app] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-05-11T10:39:05.725+03:00  WARN 18718 --- [library-app] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-05-11T10:39:06.137+03:00  INFO 18718 --- [library-app] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: create table books (id bigserial not null, author varchar(255) not null, available boolean not null, category varchar(255), description varchar(255), image bytea, isbn varchar(255) not null, publish_year integer, stock integer not null, title varchar(255) not null, primary key (id))
+Hibernate: alter table if exists books drop constraint if exists UK_kibbepcitr0a3cpk3rfr7nihn
+2026-05-11T10:39:06.170+03:00  WARN 18718 --- [library-app] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-05-11T10:39:06.171+03:00  WARN 18718 --- [library-app] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk_kibbepcitr0a3cpk3rfr7nihn" of relation "books" does not exist, skipping
+Hibernate: alter table if exists books add constraint UK_kibbepcitr0a3cpk3rfr7nihn unique (isbn)
+Hibernate: alter table if exists borrow_logs add constraint FKstjmj6aee8dj0nvc7bhbvombj foreign key (book_id) references books
+2026-05-11T10:39:06.187+03:00  INFO 18718 --- [library-app] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-11T10:39:06.345+03:00  INFO 18718 --- [library-app] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-11T10:39:06.570+03:00  WARN 18718 --- [library-app] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-11T10:39:06.701+03:00  INFO 18718 --- [library-app] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1c33d539, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@527b989a, org.springframework.security.web.context.SecurityContextHolderFilter@78fc5eb, org.springframework.security.web.header.HeaderWriterFilter@4563d421, org.springframework.web.filter.CorsFilter@2c3f47ba, org.springframework.security.web.csrf.CsrfFilter@3705e3fb, org.springframework.security.web.authentication.logout.LogoutFilter@296b758, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@6942ff10, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6f2bb798, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3a5e591b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@ca9ffc0, org.springframework.security.web.access.ExceptionTranslationFilter@10d56aab, org.springframework.security.web.access.intercept.AuthorizationFilter@6385b07d]
+2026-05-11T10:39:06.800+03:00  INFO 18718 --- [library-app] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
+2026-05-11T10:39:06.805+03:00  INFO 18718 --- [library-app] [           main] com.library.LibraryApplication           : Started LibraryApplication in 2.243 seconds (process running for 2.398)
+Hibernate: select count(*) from users u1_0
+Hibernate: select count(*) from books b1_0
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+Hibernate: insert into books (author,available,category,description,image,isbn,publish_year,stock,title) values (?,?,?,?,?,?,?,?,?)
+✅ Örnek kitaplar eklendi.

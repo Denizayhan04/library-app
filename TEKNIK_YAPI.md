@@ -61,6 +61,56 @@ Kullanıcılar ile kitaplar arasındaki "Çoka-Çok" (Many-to-Many) ilişkiyi ta
 - `returnDate` (LocalDateTime): İade tarihi (Kitap iade edilene kadar NULL).
 - `status` (String): `BORROWED` (Ödünçte) veya `RETURNED` (İade Edildi).
 
+### 4.4. PostgreSQL Veritabanı Kurulumu ve SQL Şeması
+Projenin veritabanı altyapısı Docker üzerinde çalışan bir PostgreSQL konteyneri ile sağlanmaktadır.
+
+**Konteyneri Başlatma Komutu:**
+```bash
+docker run --name library-postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_DB=postgres \
+  -p 5432:5432 \
+  -d postgres:15
+```
+
+**Oluşturulan Tabloların SQL Karşılıkları (Hibernate DDL):**
+Uygulama ayağa kalktığında Spring Boot (Hibernate) tarafından otomatik olarak aşağıdaki SQL komutlarına eşdeğer tablolar oluşturulur:
+
+```sql
+-- Kullanıcılar Tablosu
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(255) NOT NULL
+);
+
+-- Kitaplar Tablosu
+CREATE TABLE books (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    isbn VARCHAR(255) NOT NULL UNIQUE,
+    category VARCHAR(255),
+    publish_year INTEGER,
+    description VARCHAR(255),
+    stock INTEGER NOT NULL,
+    available BOOLEAN NOT NULL,
+    image BYTEA -- Resimlerin binary formatta saklandığı alan
+);
+
+-- Ödünç Alma Kayıtları Tablosu
+CREATE TABLE borrow_logs (
+    id BIGSERIAL PRIMARY KEY,
+    borrow_date TIMESTAMP,
+    return_date TIMESTAMP,
+    status VARCHAR(255),
+    book_id BIGINT REFERENCES books(id),
+    user_id BIGINT REFERENCES users(id)
+);
+```
+
 ## 5. Önemli Bileşenler ve İş Akışları
 
 ### 5.1. Güvenlik ve Kimlik Doğrulama (`SecurityConfig.java`)
@@ -105,3 +155,74 @@ Uygulama ilk kez ayağa kalktığında:
 ## 7. Geliştirme İpuçları
 - Uygulama çalışırken H2 veritabanına `http://localhost:8081/h2-console` adresinden ulaşılabilir. (JDBC URL: `jdbc:h2:mem:librarydb`, User: `sa`, Pass: boş)
 - Uygulama portu varsayılan 8080 yerine **8081** olarak ayarlanmıştır.
+
+## 8. Backend Sınıfları ve Fonksiyon Detayları
+
+Bu bölümde projedeki tüm backend sınıfları ve içerdikleri fonksiyonların ne işe yaradığı detaylıca açıklanmıştır.
+
+### 8.1. Controller (Sunum) Katmanı
+
+**`AdminController.java`**
+Yönetici paneli ve kitap yönetim işlemlerini karşılayan uç noktaları içerir.
+*   `adminPanel(Model model)`: `/admin` sayfasına (Yönetim Paneli) girildiğinde çalışır. Veritabanından tüm kitapları, toplam kullanıcı sayısını, ödünç alınan kitap sayısını ve toplam stok miktarını hesaplayarak arayüze (Thymeleaf) gönderir.
+*   `newBookForm(Model model)`: `/admin/books/new` adresine girildiğinde çalışır. Boş bir `Book` nesnesi oluşturarak "Yeni Kitap Ekle" formunu ekrana getirir.
+*   `saveBook(@Valid Book book, BindingResult result, MultipartFile imageFile, ...)`: `/admin/books/save` adresine form gönderildiğinde (POST) çalışır. Gelen kitap verilerini doğrular (`@Valid`), yüklenen bir resim varsa bunu byte dizisine çevirip kitabın `image` alanına set eder, ardından veritabanına kaydeder.
+*   `editBookForm(@PathVariable Long id, Model model)`: `/admin/books/edit/{id}` adresine girildiğinde çalışır. İlgili ID'ye sahip kitabı veritabanından bulup "Kitabı Düzenle" formuna doldurulmuş halde gönderir.
+*   `deleteBook(@PathVariable Long id, RedirectAttributes redirectAttributes)`: `/admin/books/delete/{id}` adresine POST isteği atıldığında ilgili kitabı veritabanından siler.
+
+**`BookController.java`**
+Son kullanıcıların kitapları görüntülemesi ve ödünç alma/iade etme süreçlerini yönetir.
+*   `home()`: Kök dizine (`/`) gelen istekleri direkt `/books` sayfasına yönlendirir (`redirect`).
+*   `listBooks(@RequestParam String keyword, Model model)`: `/books` sayfasına girildiğinde çalışır. Eğer arama kelimesi (`keyword`) varsa isme/yazara göre filtreleme yapar, yoksa tüm kitapları listeler.
+*   `searchBooks(@RequestParam String keyword)`: Arama formundan gelen `/books/search` isteklerini `/books?keyword=...` formatına yönlendirir.
+*   `bookDetail(@PathVariable Long id, Model model)`: Kitap detay sayfasına girildiğinde çalışır. ID'si verilen kitabın detaylarını getirir.
+*   `borrowBook(@PathVariable Long id, Authentication authentication, ...)`: Kullanıcı bir kitabı ödünç almak istediğinde çalışır. Kullanıcının giriş yapıp yapmadığını kontrol eder, giriş yapmışsa `BorrowService` üzerinden ödünç alma işlemini başlatır. Stok yetersizse hata döndürür.
+*   `getBookImage(@PathVariable Long id)`: Kitapların kapak resimlerini veritabanındaki BLOB alanından okuyup `IMAGE_JPEG` formatında tarayıcıya doğrudan sunar.
+*   `myBooks(Model model, Authentication authentication)`: Kullanıcının ödünç aldığı kitapları gördüğü `/my-books` sayfasını render eder. `BorrowService`'den o kullanıcının loglarını çeker.
+*   `returnBook(@PathVariable Long id, Authentication authentication, ...)`: Kullanıcı kitabını iade butonuna bastığında çalışır. `BorrowService` üzerinden iade işlemini gerçekleştirir.
+
+**`AuthController.java`**
+*   `loginPage(...)` (Login İşlemi): `/login` adresine girildiğinde özel giriş (login) sayfasını gösterir. Hata veya çıkış (logout) durumlarına göre ekrana mesaj basar.
+
+### 8.2. Service (İş Mantığı) Katmanı
+
+**`BookService.java`**
+*   `getAllBooks()`: Veritabanındaki tüm kitapları listeler.
+*   `getBookById(Long id)`: ID'sine göre kitabı bulur, yoksa hata fırlatır.
+*   `saveBook(Book book)`: Yeni kitabı kaydeder veya mevcut kitabı günceller.
+*   `deleteBook(Long id)`: Kitabı veritabanından siler.
+*   `searchBooks(String keyword)`: Anahtar kelime (keyword) doluysa arama yapar, boşsa tüm kitapları döndürür.
+
+**`BorrowService.java`**
+Bu servis kritik iş kurallarını (transaction) içerir.
+*   `borrowBook(Long bookId, String username)`: `@Transactional` ile işaretlenmiştir (işlem yarıda kesilirse veritabanı geri alınır). Kitabın stokta olup olmadığını kontrol eder. Stok varsa 1 azaltır ve `BorrowLog` tablosuna "BORROWED" durumunda yeni bir kayıt atar.
+*   `getUserBorrowLogs(String username)`: Belirtilen kullanıcının geçmişten bugüne tüm ödünç alma/iade kayıtlarını tarihe göre azalan şekilde (en yeni en üstte) listeler.
+*   `returnBook(Long logId, String username)`: `@Transactional` içerir. Kaydın ilgili kullanıcıya ait olup olmadığını ve zaten iade edilip edilmediğini kontrol eder. İade gerçekleşirse kitabın stoğunu 1 artırır ve log kaydının durumunu "RETURNED" yapıp iade tarihini atar.
+
+**`CustomUserDetailsService.java`**
+*   `loadUserByUsername(String username)`: Spring Security'nin login olurken çağırdığı fonksiyondur. Veritabanında (`UserRepository`) o kullanıcı adını arar. Bulursa Spring Security'nin anlayacağı `UserDetails` nesnesine dönüştürür.
+
+### 8.3. Repository (Veri Erişim) Katmanı
+Spring Data JPA kullanıldığı için bu sınıflar `JpaRepository`'den türetilmiş arayüzlerdir (Interface), gövdeleri ve SQL sorguları (büyük oranda) Spring tarafından otomatik doldurulur.
+
+**`BookRepository.java`**
+*   `search(String keyword)`: `@Query` anotasyonuyla özel JPQL yazılmıştır. Kitap isminde, yazarda veya kategoride aranan kelime geçen kitapları getirir.
+*   `sumStock()`: Veritabanındaki tüm kitapların toplam stok adedini hesaplar (`SUM(b.stock)`).
+
+**`BorrowLogRepository.java`**
+*   `findByUserUsernameOrderByBorrowDateDesc(String username)`: Sadece belli bir kullanıcıya ait kayıtları getirir.
+*   `countByStatus(String status)`: Belli bir statüdeki ("BORROWED" vb.) toplam kayıt sayısını döner (Admin paneli istatistiği için).
+*   `findAllByOrderByBorrowDateDesc()`: Tüm kayıtları kronolojik (en yeni en üstte) sıralı getirir.
+
+**`UserRepository.java`**
+*   `findByUsername(String username)`: Login işlemi sırasında kullanıcı adıyla veritabanından kullanıcı nesnesini çeker.
+
+### 8.4. Config (Yapılandırma) Katmanı
+
+**`SecurityConfig.java`**
+*   `passwordEncoder()`: Şifrelerin açık metin kalmaması için `BCryptPasswordEncoder` nesnesi üretir.
+*   `authenticationProvider()`: Veritabanı kimlik doğrulaması (`CustomUserDetailsService` ve `PasswordEncoder`) konfigürasyonunu sisteme tanıtır.
+*   `filterChain(HttpSecurity http)`: Sistemin kalbidir. Hangi URL'lere kimlerin girebileceğini belirler, login formunun yönlendirmelerini yapar, CSRF ve FrameOptions gibi güvenlik kurallarını ayarlar.
+
+**`DataInitializer.java`**
+*   `initData(...)`: Spring Boot başlarken (`CommandLineRunner`) otomatik çalışır. Veritabanı boşsa varsayılan admin (`admin`/`admin123`), user (`user`/`user123`) hesaplarını ve 8 adet örnek kitabı veritabanına kaydeder.
